@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuso - O Olho Azul</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas de partículas */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Efeitos de luz de fundo */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .glow1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #8b5cf6, transparent);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .glow2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #a78bfa, transparent);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 7s;
+        }
+
+        .glow3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #7c3aed, transparent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-100px, 100px) scale(0.9); }
+        }
+
+        /* Container principal com parallax */
+        .parallax-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header luxuoso */
+        header {
+            position: relative;
+            text-align: center;
+            padding: 120px 20px 80px;
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
+        }
+
+        .eye-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            position: relative;
+            filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.8));
+        }
+
+        .eye-outer {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 3s ease-in-out infinite;
+            border: 3px solid rgba(139, 92, 246, 0.5);
+        }
+
+        .eye-inner {
+            width: 50px;
+            height: 50px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .eye-shine {
+            width: 15px;
+            height: 15px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            animation: shine 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(139, 92, 246, 0.9); }
+        }
+
+        @keyframes shine {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .logo-text {
+            font-size: 4em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-size: 1.4em;
+            color: #a78bfa;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        /* Container de conteúdo */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            position: relative;
+        }
+
+        /* Cards luxuosos */
+        .section-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(124, 58, 237, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 60px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none; /* 🔥 LIBERA CLIQUES */
+}
+
+
+        .section-card:hover::before {
+            opacity: 1;
+        }
+
+        .section-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+        }
+
+        h2 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #8b5cf6, transparent);
+        }
+
+        .intro-text {
+            font-size: 1.2em;
+            line-height: 2;
+            color: #d1d5db;
+            margin-top: 30px;
+        }
+
+        /* Grid de áreas premium */
+        .areas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .area-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.08));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+
+        .area-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .area-card:hover::before {
+            opacity: 1;
+        }
+
+        .area-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.25);
+        }
+
+        .area-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+        }
+
+        .area-card h3 {
+            font-size: 1.8em;
+            color: #a78bfa;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .area-card p {
+            color: #d1d5db;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        /* Lista de rádios premium */
+        .radio-list {
+            list-style: none;
+            margin-top: 30px;
+        }
+
+        .radio-item {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), transparent);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-left: 4px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .radio-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), transparent);
+            transition: width 0.4s;
+        }
+
+        .radio-item:hover::before {
+            width: 100%;
+        }
+
+        .radio-item:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .radio-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .radio-info h4 {
+            color: #a78bfa;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .radio-url {
+            font-family: 'Courier New', monospace;
+            color: #9ca3af;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+            white-space: nowrap;
+            margin-left: 20px;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Formulário de mensagens moderno */
+        .message-form {
+            margin-bottom: 40px;
+        }
+
+        .message-form input,
+        .message-form textarea {
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .message-form input:focus,
+        .message-form textarea:focus {
+            outline: none;
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.08);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .message-form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .message-form button {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .message-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        /* Cards de mensagens */
+        .messages-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .message-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.08));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-left: 4px solid #a78bfa;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .message-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateX(5px);
+        }
+
+        .message-author {
+            color: #a78bfa;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+
+        .message-text {
+            color: #d1d5db;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .message-date {
+            color: #6b7280;
+            font-size: 0.85em;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* Toast luxuoso */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            padding: 24px 36px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.5);
+            z-index: 1000;
+            transform: translateY(150px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        /* Scrollbar premium */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8b5cf6, #6366f1);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a78bfa, #8b5cf6);
+            background-clip: padding-box;
+        }
+
+        /* Galeria preview */
+        .gallery-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 150px);
+            gap: 20px;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+       .preview-item {
+            aspect-ratio: 1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s;
+
+            /* NOVO */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+
+        .preview-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+       .gallery-btn {
+    position: relative;
+    z-index: 999; /* Fica acima de tudo */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    text-decoration: none;
+
+    padding: 18px 50px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1em;
+
+    cursor: pointer;
+    pointer-events: auto;
+
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gallery-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 35px rgba(139, 92, 246, 0.6);
+}
+
+.gallery-btn:active {
+    transform: translateY(-1px);
+}
+        /* Modal da imagem */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: zoomIn 0.3s;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.5);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 2.5em;
+            }
+
+            .section-card {
+                padding: 40px 30px;
+            }
+
+            .radio-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .copy-btn {
+                margin-left: 0;
+                margin-top: 15px;
+                width: 100%;
+            }
+
+            .areas-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeitos de fundo -->
+    <div class="bg-effects">
+        <div class="glow glow1"></div>
+        <div class="glow glow2"></div>
+        <div class="glow glow3"></div>
+    </div>
+
+    <!-- Canvas de partículas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Conteúdo com parallax -->
+    <div class="parallax-container">
+        <!-- Header -->
+        <header>
+            <div class="eye-logo">
+                <div class="eye-outer">
+                    <div class="eye-inner">
+                        <div class="eye-shine"></div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="logo-text">FUSO</h1>
+            <p class="tagline">O Olho Azul - Unidos como irmãos</p>
+        </header>
+
+        <!-- Container principal -->
+        <div class="container">
+            <!-- Sobre -->
+            <div class="section-card" data-parallax="0.1">
+                <h2>Bem-vindo ao Fuso</h2>
+                <p class="intro-text">
+                    Somos mais que amigos, somos uma família unida pelo <strong style="color: #a78bfa;">Olho Azul</strong>. 
+                    Este é nosso espaço sagrado, onde a iluminação violeta nos guia e a união nos fortalece. 
+                    Aqui celebramos momentos, compartilhamos alegrias e construímos memórias que duram para sempre.
+                </p>
+            </div>
+
+            <!-- Áreas -->
+            <div class="section-card" data-parallax="0.15">
+                <h2>Nossas Áreas</h2>
+                <div class="areas-grid">
+                    <div class="area-card">
+                        <div class="area-icon"></div>
+                        <h3>Área da Natureza</h3>
+                        <p>Um refúgio de paz e tranquilidade, onde nos reconectamos com o essencial. Árvores, flores e serenidade nos acolhem.</p>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon"></div>
+                        <h3>Área de Lazer</h3>
+                        <p>Diversão e risadas garantidas! Aqui jogamos, dançamos e criamos os melhores momentos juntos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rádios -->
+            <div class="section-card" data-parallax="0.2">
+                <h2>🎵 Nossas Rádios</h2>
+                <p style="color: #d1d5db; font-size: 1.1em; margin-top: 20px;">Clique em "Copiar" para usar essas rádios nas salas do IMVU:</p>
+                <ul class="radio-list">
+                    <li class="radio-item">
+                        <div class="radio-info">
+                            <h4>Sertanejo / Pagode</h4>
+                            <div class="radio-url">https://jpdofunk3.com.br:8090/stram</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyRadio('https://jpdofunk3.com.br:8090/stram')">Copiar</button>
+                    </li>
+                    <li class="radio-item">
+                        <div class="radio-info">
+                            <h4>Funk 1</h4>
+                            <div class="radio-url">https://jpdofunk3.com.br:8040/stram</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyRadio('https://jpdofunk3.com.br:8040/stram')">Copiar</button>
+                    </li>
+                    <li class="radio-item">
+                        <div class="radio-info">
+                            <h4>Funk 2</h4>
+                            <div class="radio-url">https://jpdofunk3.com.br:8070/stram</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyRadio('https://jpdofunk3.com.br:8070/stram')">Copiar</button>
+                    </li>
+                    <li class="radio-item">
+                        <div class="radio-info">
+                            <h4>Rock!</h4>
+                            <div class="radio-url">https://jpdofunk3.com.br:8284/stram</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyRadio('https://jpdofunk3.com.br:8284/stram')">Copiar</button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Galeria de Fotos -->
+          <div class="section-card" data-parallax="0.22">
+    <h2>Nossa Galeria</h2>
+    <p style="color: #d1d5db; font-size: 1.1em; margin-top: 20px; margin-bottom: 30px;">
+        Momentos inesquecíveis da família Fuso
+    </p>
+
+    <div class="gallery-preview">
+        <div class="preview-grid">
+            <div class="preview-item" style="background-image: url('fotos/1.jpg');"></div>
+            <div class="preview-item" style="background-image: url('fotos/2.jpg');"></div>
+            <div class="preview-item" style="background-image: url('fotos/3.png');"></div>
+            <div class="preview-item" style="background-image: url('fotos/4.png');"></div>
+        </div>
+
+        <a href="galeria.html" class="gallery-btn">
+            <span>Veja Nossas Fotos</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="margin-left: 10px;">
+                <path d="M7.5 15L12.5 10L7.5 5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+</div>
+
+
+            <!-- Mural -->
+            <div class="section-card" data-parallax="0.25">
+                <h2>💬 Mural de Mensagens</h2>
+                <div class="message-form">
+                    <input type="text" id="authorInput" placeholder="Seu nome" maxlength="30">
+                    <textarea id="messageInput" placeholder="Deixe sua mensagem para a família Fuso..." maxlength="500"></textarea>
+                    <button onclick="addMessage()">Enviar Mensagem</button>
+                </div>
+                <div class="messages-container" id="messagesContainer">
+                    <div class="message-card">
+                        <div class="message-author">👁️ O Guardião</div>
+                        <div class="message-text">Bem-vindos ao nosso lar digital! Que o Olho Azul nos guie sempre. 💜</div>
+                        <div class="message-date">Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Modal de imagem -->
+    <div class="image-modal" id="imageModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img id="modalImage" src="" alt="Foto da galeria">
+        </div>
+    </div>
+
+<script>
+/* =========================
+   CANVAS DE PARTÍCULAS
+========================= */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.opacity = Math.random() * 0.5 + 0.2;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+    }
+
+    draw() {
+        ctx.fillStyle = `rgba(139, 92, 246, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+const particles = [];
+for (let i = 0; i < 100; i++) {
+    particles.push(new Particle());
+}
+
+function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+                ctx.strokeStyle = `rgba(139, 92, 246, ${0.15 * (1 - distance / 120)})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    connectParticles();
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+/* =========================
+   PARALLAX
+========================= */
+window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    document.querySelectorAll('[data-parallax]').forEach(el => {
+        const speed = parseFloat(el.dataset.parallax);
+        el.style.transform = `translateY(${scrollY * speed}px)`;
+    });
+});
+
+/* =========================
+   TOAST
+========================= */
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+/* =========================
+   COPIAR URL
+========================= */
+function copyRadio(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('✨ URL copiada! Cole na sala do IMVU 🎵');
+    });
+}
+
+/* =========================
+   GALERIA MODAL
+========================= */
+function openImage(element) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+
+    const bgImage = element.style.backgroundImage;
+    if (bgImage && bgImage !== 'none') {
+        const imageUrl = bgImage.slice(5, -2);
+        modalImg.src = imageUrl;
+        modal.classList.add('active');
+    }
+}
+
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+
+/* =========================
+   INTERAÇÃO MOUSE
+========================= */
+canvas.addEventListener('mousemove', e => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    particles.forEach(p => {
+        const dx = mouseX - p.x;
+        const dy = mouseY - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+            p.x -= dx * 0.02;
+            p.y -= dy * 0.02;
+        }
+    });
+});
+
+/* =========================
+   MURAL + DISCORD WEBHOOK
+========================= */
+let lastSend = 0;
+
+function addMessage() {
+    const author = document.getElementById('authorInput').value.trim();
+    const message = document.getElementById('messageInput').value.trim();
+
+    if (!author || !message) {
+        showToast('⚠️ Preencha seu nome e mensagem!');
+        return;
+    }
+
+    const now = Date.now();
+    if (now - lastSend < 5000) {
+        showToast('⏳ Aguarde alguns segundos...');
+        return;
+    }
+    lastSend = now;
+
+    const webhookUrl = "https://discord.com/api/webhooks/1450614381619708116/sw6LERGU_xHiF2DGEAqoEgVtr54oVJ4D3PyNgDm7kpNuMAfSToOlZs3zm7j858UJHQhG";
+
+    const date = new Date();
+    const timeStr = date.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const payload = {
+        username: "💬 Mural da Família Fuso",
+        embeds: [
+            {
+                title: "📩 Nova mensagem no mural",
+                color: 0x8b5cf6,
+                fields: [
+                    { name: "👤 Autor", value: author, inline: true },
+                    { name: "⏰ Horário", value: `Hoje às ${timeStr}`, inline: true },
+                    { name: "💬 Mensagem", value: message }
+                ],
+                footer: { text: "Mural Digital • Família Fuso" },
+                timestamp: new Date().toISOString()
+            }
+        ]
+    };
+
+    fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error();
+
+        const container = document.getElementById('messagesContainer');
+        const card = document.createElement('div');
+        card.className = 'message-card';
+        card.style.animation = 'fadeIn 0.5s';
+
+        card.innerHTML = `
+            <div class="message-author">💜 ${author}</div>
+            <div class="message-text">${message}</div>
+            <div class="message-date">Hoje às ${timeStr}</div>
+        `;
+
+        container.insertBefore(card, container.firstChild);
+
+        document.getElementById('authorInput').value = '';
+        document.getElementById('messageInput').value = '';
+
+        showToast('✨ Mensagem enviada com sucesso!');
+    })
+    .catch(() => {
+        showToast('❌ Erro ao enviar mensagem!');
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Fuso - Cadastro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background:#000;
+    color:#fff;
+}
+
+/* CARD */
+.section-card {
+    max-width:720px;
+    margin:80px auto;
+    padding:60px;
+    border-radius:24px;
+    background:linear-gradient(135deg, rgba(139,92,246,.08), rgba(124,58,237,.08));
+    border:1px solid rgba(139,92,246,.25);
+    backdrop-filter:blur(20px);
+}
+
+/* TITULO */
+h2 {
+    font-size:2.3em;
+    background:linear-gradient(135deg,#fff,#a78bfa);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:15px;
+}
+
+.subtitle {
+    color:#d1d5db;
+    font-size:1.1em;
+    margin-bottom:35px;
+}
+
+/* FORM */
+.discord-form input {
+    width:100%;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    border:1px solid rgba(139,92,246,.3);
+    background:rgba(139,92,246,.05);
+    color:#fff;
+    font-size:1em;
+}
+
+.discord-form input[type="file"] {
+    padding:14px;
+    cursor:pointer;
+}
+
+.discord-form input::placeholder { color:#9ca3af; }
+
+.discord-form input:focus {
+    outline:none;
+    border-color:rgba(139,92,246,.7);
+    box-shadow:0 0 20px rgba(139,92,246,.3);
+}
+
+.discord-form button {
+    width:100%;
+    padding:18px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    background:linear-gradient(135deg,#8b5cf6,#6366f1);
+    color:#fff;
+    font-weight:600;
+    font-size:1.1em;
+    transition:.3s;
+    box-shadow:0 4px 20px rgba(139,92,246,.4);
+}
+
+.discord-form button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 8px 30px rgba(139,92,246,.6);
+}
+
+/* TOAST */
+.toast {
+    position:fixed;
+    bottom:40px;
+    right:40px;
+    background:linear-gradient(135deg,#8b5cf6,#6366f1);
+    color:#fff;
+    padding:20px 30px;
+    border-radius:14px;
+    font-weight:600;
+    box-shadow:0 10px 40px rgba(139,92,246,.5);
+    transform:translateY(150px);
+    transition:.4s;
+    z-index:999;
+}
+
+.toast.show { transform:translateY(0); }
+
+@media(max-width:768px){
+    .section-card{padding:40px 25px;margin:40px 15px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="section-card">
+    <h2>👁️ Envie sua foto conosco</h2>
+    <p class="subtitle">Coloque seus dados e a foto desejada</p>
+
+    <form class="discord-form" id="discordForm">
+        <input type="text" id="gameName" placeholder="Seu nome no jogo" required>
+        <input type="text" id="instagram" placeholder="Seu @ do Instagram" required>
+
+        <input 
+            type="file" 
+            id="photo" 
+            accept="image/png, image/jpeg, image/jpg"
+            required
+        >
+
+        <button type="submit">Enviar para o Discord</button>
+    </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const webhookURL = "https://discord.com/api/webhooks/1450122133542801513/J51HdHnRxZnwgCNW3jPK-CYD9emMN4Hariewdl-SYKoWRPx3Uut92M4I1uJ13mTyIORR";
+const form = document.getElementById("discordForm");
+const toast = document.getElementById("toast");
+
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const gameName = document.getElementById("gameName").value.trim();
+    const instagram = document.getElementById("instagram").value.trim();
+    const photo = document.getElementById("photo").files[0];
+
+    if(!gameName || !instagram || !photo){
+        showToast("⚠️ Preencha todos os campos");
+        return;
+    }
+
+    const formData = new FormData();
+
+    const payload = {
+        embeds: [{
+            title: "👁️ Novo Cadastro – Família Fuso",
+            color: 0x8b5cf6,
+            fields: [
+                { name: "🎮 Nome no jogo", value: gameName },
+                { name: "📸 Instagram", value: instagram }
+            ],
+            image: { url: "attachment://foto.png" },
+            footer: { text: "Fuso • O Olho Azul" },
+            timestamp: new Date().toISOString()
+        }]
+    };
+
+    formData.append("payload_json", JSON.stringify(payload));
+    formData.append("file", photo, "foto.png");
+
+    fetch(webhookURL, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => {
+        if(res.ok){
+            showToast("✨ Enviado com sucesso!");
+            form.reset();
+        } else {
+            showToast("❌ Erro ao enviar");
+        }
+    })
+    .catch(() => showToast("❌ Falha de conexão"));
+});
+
+function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+}
+</script>
+
+</body>
+</html>

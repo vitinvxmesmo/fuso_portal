@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria - Fuso | O Olho Azul</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Canvas de partículas */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Efeitos de luz de fundo */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .glow1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #8b5cf6, transparent);
+            top: -200px;
+            left: -200px;
+        }
+
+        .glow2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #a78bfa, transparent);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-100px, 100px) scale(0.9); }
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+        }
+
+        h1 {
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #a78bfa;
+            font-weight: 300;
+        }
+
+        /* Container da galeria */
+        .gallery-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Grid de fotos masonry style */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-size: cover;
+            background-position: center;
+            aspect-ratio: 1;
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.8));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .gallery-item {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.4);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* 🔥 MOSTRA A FOTO INTEIRA */
+    transition: transform 0.4s ease;
+}
+
+
+        .gallery-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            font-weight: 600;
+        }
+
+        .gallery-placeholder span {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .gallery-placeholder p {
+            font-size: 1.2em;
+            color: #d1d5db;
+        }
+
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+            transform: translateY(100%);
+            transition: transform 0.4s;
+            z-index: 1;
+        }
+
+        .gallery-item:hover .photo-caption {
+            transform: translateY(0);
+        }
+
+        /* Modal fullscreen */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: zoomIn 0.3s;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.5);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -60px;
+            right: 0;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .modal-nav:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .modal-prev {
+            left: -80px;
+        }
+
+        .modal-next {
+            right: -80px;
+        }
+
+        /* Upload section */
+        .upload-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(124, 58, 237, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            font-size: 2em;
+            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .upload-section p {
+            color: #d1d5db;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+
+        .upload-info {
+    display: inline-block;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    padding: 20px 30px;
+    color: #a78bfa;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.upload-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+}
+
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8b5cf6, #6366f1);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a78bfa, #8b5cf6);
+            background-clip: padding-box;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+
+            .modal-close {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeitos de fundo -->
+    <div class="bg-effects">
+        <div class="glow glow1"></div>
+        <div class="glow glow2"></div>
+    </div>
+
+    <!-- Canvas de partículas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Header -->
+    <header>
+        <a href="index.html" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Voltar
+        </a>
+        <h1>📸 NOSSA GALERIA</h1>
+        <p class="subtitle">Momentos eternizados da família Fuso</p>
+    </header>
+
+    <!-- Container da galeria -->
+<!-- Container da galeria -->
+<div class="gallery-container">
+    <!-- Instruções para adicionar fotos -->
+    <div class="upload-section">
+        <h2>✨ Como adicionar suas fotos</h2>
+        <p>Para adicionar fotos reais da comunidade, clique aqui!</p>
+
+        <!-- Botão clicável para enviar foto -->
+        <a href="form.html" class="upload-info">
+            CLIQUE AQUI E ENVIE SUA FOTO!
+        </a>
+    </div>
+
+    <!-- Galeria ou outras seções aqui -->
+</div>
+
+
+       <div class="gallery-grid">
+
+    <div class="gallery-item" onclick="openModal(0)">
+        <img src="/fotos/1.jpg" alt="1">
+        <div class="photo-caption">Wy</div>
+    </div>
+
+    <div class="gallery-item" onclick="openModal(1)">
+        <img src="/fotos/2.jpg" alt="2">
+        <div class="photo-caption">Yu</div>
+    </div>
+
+    <div class="gallery-item" onclick="openModal(2)">
+        <img src="/fotos/3.png" alt="Olho Azul">
+        <div class="photo-caption">Fuso</div>
+    </div>
+
+    <div class="gallery-item" onclick="openModal(3)">
+        <img src="/fotos/4.png" alt="4">
+        <div class="photo-caption">Henrique</div>
+    </div>
+</div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <button class="modal-nav modal-prev" onclick="prevImage(event)">‹</button>
+            <button class="modal-nav modal-next" onclick="nextImage(event)">›</button>
+            <img id="modalImage" src="" alt="Foto da galeria">
+        </div>
+    </div>
+
+   <script>
+    /* ===============================
+       SISTEMA DE PARTÍCULAS (mantido)
+    =============================== */
+
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+
+        draw() {
+            ctx.fillStyle = `rgba(139, 92, 246, ${this.opacity})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    const particles = [];
+    for (let i = 0; i < 80; i++) {
+        particles.push(new Particle());
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+
+    /* ===============================
+       GALERIA + MODAL (CORRIGIDO)
+    =============================== */
+
+    let currentImageIndex = 0;
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+
+    function openModal(index) {
+        currentImageIndex = index;
+        const img = galleryItems[index].querySelector('img');
+
+        modalImage.src = img.src;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        modalImage.src = '';
+        document.body.style.overflow = '';
+    }
+
+    function nextImage(event) {
+        event.stopPropagation();
+        currentImageIndex = (currentImageIndex + 1) % galleryItems.length;
+        openModal(currentImageIndex);
+    }
+
+    function prevImage(event) {
+        event.stopPropagation();
+        currentImageIndex =
+            (currentImageIndex - 1 + galleryItems.length) % galleryItems.length;
+        openModal(currentImageIndex);
+    }
+
+    /* ===============================
+       CONTROLES DE TECLADO
+    =============================== */
+
+    document.addEventListener('keydown', (e) => {
+        if (!modal.classList.contains('active')) return;
+
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowRight') nextImage(e);
+        if (e.key === 'ArrowLeft') prevImage(e);
+    });
+
+    /* ===============================
+       FECHAR AO CLICAR FORA DA IMAGEM
+    =============================== */
+
+    modal.addEventListener('click', closeModal);
+</script>
+</body>
+</html>
